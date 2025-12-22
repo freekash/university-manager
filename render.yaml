@@ -30,7 +30,7 @@ services:
       - key: PRISMA_CLIENT_ENGINE_TYPE
         value: "library"
 
-  - type: static_site
+  - type: static-site
     name: university-manager-client
     rootDir: client
     buildCommand: npm install && npm run build
