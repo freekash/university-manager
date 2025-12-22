@@ -1,0 +1,41 @@
+# render.yaml - Defines services for Render deployment
+# This file should be placed in the root of your project: /Users/amithks/UniversityManager/render.yaml
+
+services:
+  - type: web
+    name: university-manager-server
+    env: node
+    rootDir: server
+    buildCommand: npm install && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: "5000"
+      - key: DATABASE_URL # Replace with your Render PostgreSQL internal connection string
+        sync: false # Set to true to sync from Render dashboard
+      - key: JWT_SECRET # Generate a strong, random secret
+        sync: false
+      - key: EMAIL_USER # Your email for sending emails (if used)
+        sync: false
+      - key: EMAIL_PASS # Your email app password
+        sync: false
+      - key: CLIENT_URL # URL where your client app will be hosted on Render
+        sync: false
+      # Add any other environment variables your server needs
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+      - key: PRISMA_CLIENT_ENGINE_TYPE
+        value: "library"
+
+  - type: static_site
+    name: university-manager-client
+    env: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL # The URL of your deployed server API
+        sync: false

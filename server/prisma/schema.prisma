@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  FACULTY
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  name     String
+  role     UserRole @default(STUDENT)
+
+  departmentId Int
+  department   Department? @relation("DepartmentUsers", fields: [departmentId], references: [id])
+
+  student  Student?
+  faculty  Faculty?
+  notifications Notification[]
+}
+
+model Branch {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique
+  departments Department[]
+}
+
+model Department {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  branchId Int
+  branch   Branch    @relation(fields: [branchId], references: [id])
+
+  users    User[] @relation("DepartmentUsers")
+  faculty  Faculty[]
+  students Student[] @relation("DepartmentToStudent")
+  classes  Class[]
+  subjects Subject[]
+}
+
+model Semester {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+
+  classes   Class[]
+  subjects  Subject[]
+}
+
+model Faculty {
+  id           Int         @id @default(autoincrement())
+  userId       Int         @unique
+  user         User        @relation(fields: [userId], references: [id])
+  departmentId Int
+  department   Department  @relation(fields: [departmentId], references: [id])
+
+  classes      Class[] // Classes where this faculty is the class teacher
+  courseFaculty CourseFaculty[] // Subjects taught by this faculty
+}
+
+model Student {
+  id                   Int         @id @default(autoincrement())
+  userId               Int         @unique
+  user                 User        @relation(fields: [userId], references: [id])
+  parentWhatsappNumber String?
+  batch                String?
+  departmentId         Int
+  department           Department  @relation("DepartmentToStudent", fields: [departmentId], references: [id])
+
+  classId              Int?
+  class                Class?      @relation("ClassToStudent", fields: [classId], references: [id])
+
+  attendances Attendance[]
+  marks       Mark[]
+}
+
+model Class {
+  id           Int         @id @default(autoincrement())
+  name         String
+  semesterId   Int
+  semester     Semester    @relation(fields: [semesterId], references: [id])
+  departmentId Int
+  department   Department  @relation(fields: [departmentId], references: [id])
+  facultyId    Int? // Class Teacher
+  faculty      Faculty?    @relation(fields: [facultyId], references: [id])
+
+  students     Student[]       @relation("ClassToStudent")// Students belonging to this class
+  subjects     CourseFaculty[] // Subjects taught in this class
+  attendances  Attendance[]
+  marks        Mark[]
+}
+
+model Subject {
+  id           Int         @id @default(autoincrement())
+  name         String
+  code         String      @unique
+  departmentId Int
+  department   Department  @relation(fields: [departmentId], references: [id])
+  semesterId   Int
+  semester     Semester    @relation(fields: [semesterId], references: [id])
+
+  courseFaculty CourseFaculty[] // Faculty teaching this subject in a class
+  attendances  Attendance[]
+  marks        Mark[]
+}
+
+model CourseFaculty {
+  id        Int      @id @default(autoincrement())
+  facultyId Int
+  faculty   Faculty  @relation(fields: [facultyId], references: [id])
+  subjectId Int
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+
+  @@unique([facultyId, subjectId, classId])
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  studentId Int
+  student   Student          @relation(fields: [studentId], references: [id])
+  classId   Int
+  class     Class            @relation(fields: [classId], references: [id])
+  subjectId Int
+  subject   Subject          @relation(fields: [subjectId], references: [id])
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+
+  @@unique([studentId, classId, subjectId, date])
+}
+
+model Mark {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  student       Student  @relation(fields: [studentId], references: [id])
+  classId       Int
+  class         Class    @relation(fields: [classId], references: [id])
+  subjectId     Int
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+  marksObtained Int
+  totalMarks    Int
+  examType      String
+
+  @@unique([studentId, classId, subjectId, examType])
+}
+
+model WhatsAppLog {
+  id            Int      @id @default(autoincrement())
+  toNumber      String
+  messageBody   String   @db.Text
+  status        String   // e.g., 'sent', 'failed', 'delivered', 'read'
+  metaMessageId String?
+  sentAt        DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
