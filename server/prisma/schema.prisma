@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -25,7 +24,7 @@ model User {
   name     String
   role     UserRole @default(STUDENT)
 
-  departmentId Int
+  departmentId Int?
   department   Department? @relation("DepartmentUsers", fields: [departmentId], references: [id])
 
   student  Student?
