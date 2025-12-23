@@ -4,7 +4,7 @@
 services:
   - type: web
     name: university-manager-server
-    runtime: node # Changed from env: node
+    env: node
     rootDir: server
     buildCommand: npm install
     startCommand: npx prisma migrate deploy && npm start
@@ -34,7 +34,7 @@ services:
     name: university-manager-client
     rootDir: client
     buildCommand: npm install && npm run build
-    staticPublishPath: dist # Changed from publishPath
+    publishPath: dist
     envVars:
       - key: VITE_API_URL
         sync: false
