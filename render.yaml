@@ -6,8 +6,8 @@ services:
     name: university-manager-server
     runtime: node # Changed from env: node
     rootDir: server
-    buildCommand: npm install && npx prisma migrate deploy
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: npx prisma migrate deploy && npm start
     healthCheckPath: /
     envVars:
       - key: PORT
@@ -30,9 +30,8 @@ services:
       - key: PRISMA_CLIENT_ENGINE_TYPE
         value: "library"
 
-  - type: web # Changed from static
+  - type: static
     name: university-manager-client
-    runtime: static # Added based on schema error
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: dist # Changed from publishPath
