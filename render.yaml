@@ -1,6 +1,11 @@
 # render.yaml - Defines services for Render deployment
 # This file should be placed in the root of your project: /Users/amithks/UniversityManager/render.yaml
 
+databases:
+  - name: university-manager-db
+    databaseName: university_manager
+    user: university_user
+
 services:
   - type: web
     name: university-manager-server
@@ -12,8 +17,10 @@ services:
     envVars:
       - key: PORT
         value: "5000"
-      - key: DATABASE_URL # Replace with your Render PostgreSQL internal connection string
-        sync: false # Set to true to sync from Render dashboard
+      - key: DATABASE_URL
+        fromDatabase:
+          name: university-manager-db
+          property: connectionString
       - key: JWT_SECRET # Generate a strong, random secret
         sync: false
       - key: EMAIL_USER # Your email for sending emails (if used)
