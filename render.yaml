@@ -5,6 +5,7 @@ databases:
   - name: university-manager-db
     databaseName: university_manager
     user: university_user
+    plan: free
 
 services:
   - type: web
