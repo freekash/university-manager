@@ -1,12 +1,6 @@
 # render.yaml - Defines services for Render deployment
 # This file should be placed in the root of your project: /Users/amithks/UniversityManager/render.yaml
 
-databases:
-  - name: university-manager-db
-    databaseName: university_manager
-    user: university_user
-    plan: free
-
 services:
   - type: web
     name: university-manager-server
@@ -19,9 +13,7 @@ services:
       - key: PORT
         value: "5000"
       - key: DATABASE_URL
-        fromDatabase:
-          name: university-manager-db
-          property: connectionString
+        value: "postgresql://neondb_owner:npg_1Cv4RZctjmwM@ep-young-math-ahk22job-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
       - key: JWT_SECRET # Generate a strong, random secret
         sync: false
       - key: EMAIL_USER # Your email for sending emails (if used)
